@@ -126,10 +126,18 @@ def draw_pause_buttons():
     pygame.display.flip()
     return buttons
 
+# Mostrar vencedor
+
+def show_winner(winner_text):
+    WIN.fill(BLACK)
+    message = FONT.render(winner_text, True, WHITE)
+    WIN.blit(message, (WIDTH // 2 - message.get_width() // 2, HEIGHT // 2 - message.get_height() // 2))
+    pygame.display.flip()
+    pygame.time.delay(3000)  # Mostra por 3 segundos
+
 # Loop principal
 while True:
     CLOCK.tick(FPS)
-
     if MODE == "MENU":
         buttons = draw_menu_buttons()
         for event in pygame.event.get():
@@ -140,8 +148,10 @@ while True:
                 mouse_pos = pygame.mouse.get_pos()
                 click_sound.play()
                 if buttons["1x1"].collidepoint(mouse_pos):
+                    # pygame.mixer.music.stop() # INTERROMPE A MÚSICA ASSIM QUE COMEÇA O JOGO
                     MODE = "1x1"
                 elif buttons["1xIA"].collidepoint(mouse_pos):
+                    # pygame.mixer.music.stop() # INTERROMPE A MÚSICA ASSIM QUE COMEÇA O JOGO
                     MODE = "1xIA"
                 elif buttons["Dificuldade"].collidepoint(mouse_pos):
                     if DIFFICULTY == "Fácil":
@@ -153,10 +163,6 @@ while True:
                 elif buttons["Pontuação"].collidepoint(mouse_pos):
                     idx = POINT_LIMITS.index(POINT_LIMIT)
                     POINT_LIMIT = POINT_LIMITS[(idx + 1) % len(POINT_LIMITS)]
-                elif buttons["Iniciar"].collidepoint(mouse_pos):
-                    score1, score2 = 0, 0
-                    reset_ball(ball)
-                    paused = False
 
     elif paused:
         pause_buttons = draw_pause_buttons()
@@ -206,7 +212,14 @@ while True:
         ball_dx, ball_dy = handle_collision(ball, player1, player2, ball_dx, ball_dy)
         score1, score2 = update_score(ball, score1, score2)
 
-        if score1 >= POINT_LIMIT or score2 >= POINT_LIMIT:
+        if score1 >= POINT_LIMIT:
+            show_winner("Jogador 1 venceu!")
+            MODE = "MENU"
+            score1, score2 = 0, 0
+            reset_ball(ball)
+
+        if score2 >= POINT_LIMIT:
+            show_winner("Jogador 2 venceu!" if MODE == "1x1" else "IA venceu!")
             MODE = "MENU"
             score1, score2 = 0, 0
             reset_ball(ball)
